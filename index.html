@@ -3,124 +3,122 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Discovering &amp; Sharing Cultures | eTwinning Quiz</title>
-  <meta name="description" content="An interactive quiz game exploring Italian, Bulgarian, Romanian, and Turkish cultures — eTwinning Project.">
+  <title>Discovering & Sharing Cultures — eTwinning Quiz</title>
+  <meta name="description" content="Interactive cultural quiz — Italy, Bulgaria, Romania, Turkey.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌍</text></svg>">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- ========== WELCOME SCREEN ========== -->
-  <div id="screen-welcome" class="screen active">
-    <div class="welcome-content">
-      <div class="flags-row">
-        <img class="flag-img" src="https://flagcdn.com/w80/it.png" alt="Italy">
-        <img class="flag-img" src="https://flagcdn.com/w80/bg.png" alt="Bulgaria">
-        <img class="flag-img" src="https://flagcdn.com/w80/ro.png" alt="Romania">
-        <img class="flag-img" src="https://flagcdn.com/w80/tr.png" alt="Turkey">
+<!-- ══ WELCOME ══════════════════════════════════════ -->
+<div id="screen-welcome" class="screen active">
+  <div class="welcome-wrap">
+    <p class="title-eyebrow">eTwinning Project 2024</p>
+    <h1 class="game-title">Discovering &amp;<br><span>Sharing Cultures</span></h1>
+    <p class="game-subtitle">Test your knowledge of European traditions, cities &amp; customs</p>
+    <div class="flags-row">
+      <div class="flag-item"><img class="flag-img" src="https://flagcdn.com/w80/it.png" alt="Italy"><span class="flag-label">Italy</span></div>
+      <div class="flag-item"><img class="flag-img" src="https://flagcdn.com/w80/bg.png" alt="Bulgaria"><span class="flag-label">Bulgaria</span></div>
+      <div class="flag-item"><img class="flag-img" src="https://flagcdn.com/w80/ro.png" alt="Romania"><span class="flag-label">Romania</span></div>
+      <div class="flag-item"><img class="flag-img" src="https://flagcdn.com/w80/tr.png" alt="Turkey"><span class="flag-label">Turkey</span></div>
+    </div>
+    <div class="join-box">
+      <label for="player-name-input">Enter your name to join</label>
+      <input type="text" id="player-name-input" placeholder="Your name…" maxlength="20" autocomplete="off">
+      <button class="btn-start" id="btn-join">Join Game →</button>
+      <p id="error-msg" style="display:none;color:#f87171;font-size:.85rem;margin-top:10px;text-align:center"></p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ LOBBY ═════════════════════════════════════════ -->
+<div id="screen-lobby" class="screen">
+  <div class="lobby-wrap">
+    <h2 class="lobby-title">🌍 Game Lobby</h2>
+    <p id="lobby-status" class="lobby-status">Waiting for players… (minimum 4)</p>
+    <div id="lobby-players" class="lobby-players"></div>
+    <div class="lobby-actions">
+      <button id="btn-toggle-ready" class="btn btn-gold">I'm Ready!</button>
+      <button id="btn-start-game" class="btn-start" disabled>Start Game →</button>
+    </div>
+    <p style="font-size:.75rem;color:var(--text-muted);margin-top:12px">All players must be ready to start (min 4)</p>
+  </div>
+</div>
+
+<!-- ══ GAME ══════════════════════════════════════════ -->
+<div id="screen-game" class="screen">
+  <div class="game-header">
+    <div class="pill pill-gold">Round <span id="current-round">1</span>/4</div>
+    <div class="pill">Q <span id="current-question">1</span>/10</div>
+    <div class="timer-wrap">
+      <div id="timer-bar" class="timer-bar"></div>
+      <span id="timer-text">20</span>
+    </div>
+    <div class="pill">✓ <span id="answered-count">0</span>/<span id="total-count">0</span></div>
+  </div>
+
+  <div class="question-card" id="question-section">
+    <div class="q-meta">
+      <div class="q-country-badge">
+        <img class="question-flag-img" id="question-flag" src="https://flagcdn.com/w80/it.png" alt="">
+        <span id="question-country">Italy</span>
       </div>
-      <h1 class="game-title">Discovering<br>&amp; Sharing Cultures</h1>
-      <p class="game-subtitle">eTwinning Project &bull; Interactive Quiz Game</p>
-
-      <div class="join-section">
-        <input type="text" id="player-name-input" placeholder="Enter your name…" maxlength="20" autocomplete="off">
-        <button id="btn-add-player" class="btn btn-primary">Join 🎉</button>
-      </div>
-
-      <button id="btn-start-game" class="btn btn-start" disabled>Start Game 🚀</button>
     </div>
+    <h2 class="question-text" id="question-text">Loading…</h2>
+    <p id="answered-indicator" style="margin-top:14px;font-size:.9rem;min-height:22px"></p>
   </div>
 
-  <!-- ========== GAME SCREEN ========== -->
-  <div id="screen-game" class="screen">
-    <!-- Header bar -->
-    <div class="game-header">
-      <div class="round-info">Round <span id="current-round">1</span> / 4</div>
-      <div class="question-counter">Question <span id="current-question">1</span> / 10</div>
-      <div class="timer-container">
-        <div id="timer-bar" class="timer-bar"></div>
-        <span id="timer-text">20</span>
-      </div>
-    </div>
-
-    <!-- Current player banner (multiplayer) -->
-    <div id="current-player-banner" class="current-player-banner" style="display:none">
-      <div class="player-avatar" id="banner-avatar">A</div>
-      <span id="banner-name">Player</span>
-      <span style="margin-left:auto;font-size:.85rem;color:#636e82" id="banner-hint">Pick your answer!</span>
-    </div>
-
-    <!-- Question card -->
-    <div class="question-section" id="question-section">
-      <img class="question-flag-img" id="question-flag" src="https://flagcdn.com/w80/it.png" alt="flag">
-      <h2 class="question-text" id="question-text">Question goes here?</h2>
-    </div>
-
-    <!-- Answer options -->
-    <div class="options-grid" id="options-grid">
-      <button class="option-btn option-red"    data-index="0"><span class="option-shape">▲</span><span class="option-text"></span></button>
-      <button class="option-btn option-blue"   data-index="1"><span class="option-shape">◆</span><span class="option-text"></span></button>
-      <button class="option-btn option-yellow" data-index="2"><span class="option-shape">●</span><span class="option-text"></span></button>
-      <button class="option-btn option-green"  data-index="3"><span class="option-shape">■</span><span class="option-text"></span></button>
-    </div>
+  <div class="options-grid" id="options-grid">
+    <button class="option-btn opt-1" data-index="0"><div class="opt-num">A</div><span class="opt-text"></span></button>
+    <button class="option-btn opt-2" data-index="1"><div class="opt-num">B</div><span class="opt-text"></span></button>
+    <button class="option-btn opt-3" data-index="2"><div class="opt-num">C</div><span class="opt-text"></span></button>
+    <button class="option-btn opt-4" data-index="3"><div class="opt-num">D</div><span class="opt-text"></span></button>
   </div>
+</div>
 
-  <!-- ========== PLAYER TURN OVERLAY ========== -->
-  <div id="overlay-turn" class="overlay" style="display:none">
-    <div class="turn-card">
-      <div class="turn-avatar" id="turn-avatar">A</div>
-      <h2 id="turn-name">Player Name</h2>
-      <p>It's your turn!</p>
-      <button id="btn-ready" class="btn btn-primary">I'm Ready! 👋</button>
-    </div>
+<!-- ══ ROUND END ═════════════════════════════════════ -->
+<div id="screen-round-end" class="screen">
+  <div class="results-wrap">
+    <h1 class="screen-title" id="round-end-title">Round 1 Complete</h1>
+    <p class="screen-sub" id="round-end-sub"></p>
+    <div id="round-leaderboard" class="leaderboard"></div>
+    <button class="btn-start" id="btn-next-round" style="display:none">Next Round →</button>
+    <p id="waiting-host-msg" style="display:none;color:var(--text-muted);font-size:.85rem;margin-top:10px">Waiting for host…</p>
   </div>
+</div>
 
-  <!-- ========== ANSWER FEEDBACK OVERLAY ========== -->
-  <div id="overlay-feedback" class="overlay" style="display:none">
-    <div class="feedback-card">
-      <div class="feedback-icon" id="feedback-icon">✓</div>
-      <h2 id="feedback-text">Correct!</h2>
-      <p id="feedback-points"></p>
-    </div>
+<!-- ══ GAME END ══════════════════════════════════════ -->
+<div id="screen-game-end" class="screen">
+  <canvas id="confetti-canvas"></canvas>
+  <div class="results-wrap">
+    <h1 class="screen-title">🏆 Final Results</h1>
+    <p class="screen-sub">Congratulations to all players!</p>
+    <div id="podium" class="podium"></div>
+    <div id="final-leaderboard" class="leaderboard"></div>
+    <button class="btn-start" id="btn-play-again" style="display:none;margin-top:8px">Play Again →</button>
+    <p id="waiting-again-msg" style="display:none;color:var(--text-muted);font-size:.85rem;margin-top:10px">Waiting for host…</p>
   </div>
+</div>
 
-  <!-- ========== ANSWER REVEAL OVERLAY (multiplayer) ========== -->
-  <div id="overlay-reveal" class="overlay" style="display:none">
-    <div class="reveal-card">
-      <h3>The correct answer is</h3>
-      <div class="correct-answer-display" id="correct-answer-text">Answer</div>
-      <div class="player-results" id="player-results"></div>
-      <button id="btn-next-question" class="btn btn-primary">Next →</button>
-    </div>
+<!-- ══ OVERLAY — REVEAL ══════════════════════════════ -->
+<div id="overlay-reveal" class="overlay" style="display:none">
+  <div class="modal reveal-modal">
+    <p class="reveal-label">Correct answer</p>
+    <div class="correct-answer-tag">✓ <span id="correct-answer-text">Answer</span></div>
+    <div class="player-results" id="player-results"></div>
+    <button id="btn-next-question" class="btn btn-gold" style="width:100%;padding:13px;display:none">Next Question →</button>
+    <p id="reveal-waiting" style="color:var(--text-muted);font-size:.85rem;margin-top:8px">Waiting for host…</p>
   </div>
+</div>
 
-  <!-- ========== ROUND END SCREEN ========== -->
-  <div id="screen-round-end" class="screen">
-    <div class="round-end-content">
-      <h1 id="round-end-title">Round 1 Complete! 🎉</h1>
-      <div id="round-leaderboard" class="leaderboard"></div>
-      <button id="btn-next-round" class="btn btn-start">Next Round →</button>
-    </div>
-  </div>
+<!-- ══ SIDEBAR ═══════════════════════════════════════ -->
+<div id="sidebar">
+  <p class="sidebar-title">Players</p>
+  <div id="player-list" class="player-list"></div>
+</div>
 
-  <!-- ========== GAME END SCREEN ========== -->
-  <div id="screen-game-end" class="screen">
-    <canvas id="confetti-canvas"></canvas>
-    <div class="game-end-content">
-      <h1>🏆 Final Results</h1>
-      <div id="podium" class="podium"></div>
-      <div id="final-leaderboard" class="leaderboard"></div>
-      <button id="btn-play-again" class="btn btn-start">Play Again 🔄</button>
-    </div>
-  </div>
-
-  <!-- ========== SIDEBAR ========== -->
-  <div id="sidebar">
-    <div class="sidebar-header"><h3>👥 Players</h3></div>
-    <div id="player-list" class="player-list"></div>
-  </div>
-
-  <script src="questions.js"></script>
-  <script src="app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+<script src="questions.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
