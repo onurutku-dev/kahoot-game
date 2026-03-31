@@ -10,10 +10,16 @@
 </head>
 <body>
 
+<!-- Mute button -->
+<button id="btn-mute" onclick="toggleMute()" title="Toggle sound"
+  style="position:fixed;top:14px;right:14px;z-index:200;background:var(--bg-card);border:1px solid var(--border);border-radius:50%;width:40px;height:40px;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-primary);transition:all .2s">
+  🔊
+</button>
+
 <!-- ══ WELCOME ══════════════════════════════════════ -->
 <div id="screen-welcome" class="screen active">
   <div class="welcome-wrap">
-    <p class="title-eyebrow">eTwinning Project 2026</p>
+    <p class="title-eyebrow">eTwinning Project 2024</p>
     <h1 class="game-title">Discovering &amp;<br><span>Sharing Cultures</span></h1>
     <p class="game-subtitle">Test your knowledge of European traditions, cities &amp; customs</p>
     <div class="flags-row">
@@ -118,6 +124,7 @@
 </div>
 
 <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
+<script src="sounds.js"></script>
 <script src="questions.js"></script>
 <script src="app.js"></script>
 </body>
