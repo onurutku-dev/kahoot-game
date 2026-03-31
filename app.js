@@ -75,6 +75,13 @@ const G = {
 
 let ably, channel;
 
+// ── Mute toggle (called from HTML button) ─────────────────────
+function toggleMute() {
+  const muted = SFX.toggleMute();
+  const btn   = document.getElementById('btn-mute');
+  if (btn) btn.textContent = muted ? '🔇' : '🔊';
+}
+
 // ── Boot ───────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   $('btn-join').addEventListener('click', doJoin);
@@ -153,6 +160,7 @@ async function doJoin() {
 
     showScreen('screen-lobby');
     refreshPlayers();
+    SFX.playerJoined();
 
   } catch (err) {
     showErr('Connection failed. Check your Ably API key.');
@@ -224,6 +232,7 @@ function updateLobby() {
 async function toggleReady() {
   const me = G.players[G.myId];
   if (!me) return;
+  SFX.readyUp();
   await channel.presence.update({ ...me, ready: !me.ready });
 }
 
@@ -277,6 +286,7 @@ function onGameEvent(data) {
     G._revealDone = false;
     const q = ALL_QUESTIONS.find(q => q.id === questionId);
     renderQuestion(q);
+    SFX.questionStart();
 
   } else if (status === 'reveal' && G._prevStatus !== 'reveal') {
     G._prevStatus = 'reveal';
@@ -382,6 +392,7 @@ function onAnswer(displayIdx) {
   $('answered-indicator').innerHTML = correct
     ? '<span style="color:#34d399;font-weight:700">✓ Correct! Locked in.</span>'
     : '<span style="color:#f87171;font-weight:700">✗ Wrong. Locked in.</span>';
+  if (correct) SFX.correct(); else SFX.wrong();
 
   // Publish answer to all
   channel.publish('answer', {
@@ -411,6 +422,7 @@ function onTimeout() {
   G.hasAnswered = true;
   document.querySelectorAll('.option-btn').forEach(b => { b.disabled = true; b.style.opacity = '0.35'; });
   $('answered-indicator').innerHTML = '<span style="color:#f87171;font-weight:700">⏰ Time\'s up!</span>';
+  SFX.timeout();
   channel.publish('answer', {
     playerId: G.myId,
     questionId: G.gameState.questionId,
@@ -423,6 +435,7 @@ function onTimeout() {
 // ── Host: Advance to Reveal ────────────────────────────────────
 function hostAdvanceReveal() {
   if (!G.isHost || G.gameState.status === 'reveal') return;
+  SFX.reveal();
   channel.publish('game', {
     status: 'reveal',
     questionId: G.gameState.questionId,
@@ -521,6 +534,7 @@ function renderRoundEnd() {
   $('btn-next-round').textContent = round >= TOTAL_ROUNDS ? 'See Final Results →' : 'Next Round →';
   $('btn-next-round').style.display = G.isHost ? 'block' : 'none';
   $('waiting-host-msg').style.display = G.isHost ? 'none' : 'block';
+  SFX.roundEnd();
   showScreen('screen-round-end');
 }
 
@@ -545,6 +559,7 @@ function renderGameEnd() {
   $('btn-play-again').style.display = G.isHost ? 'block' : 'none';
   $('waiting-again-msg').style.display = G.isHost ? 'none' : 'block';
   showScreen('screen-game-end');
+  SFX.gameEnd();
   launchConfetti();
 }
 
@@ -598,10 +613,20 @@ function startTimer(serverStart) {
     const elapsed = (Date.now() - serverStart) / 1000;
     const left = Math.max(0, QUESTION_TIME - elapsed);
     const pct = (left / QUESTION_TIME) * 100;
+    const secsLeft = Math.ceil(left);
 
     $('timer-bar').style.width = pct + '%';
     $('timer-bar').className = 'timer-bar' + (pct < 25 ? ' danger' : pct < 50 ? ' warn' : '');
-    $('timer-text').textContent = Math.ceil(left);
+    $('timer-text').textContent = secsLeft;
+
+    // Timer tick — last 5 seconds, on each whole second
+    if (secsLeft <= 5 && !G.hasAnswered) {
+      const key = `tick_${secsLeft}`;
+      if (!G._lastTick || G._lastTick !== secsLeft) {
+        G._lastTick = secsLeft;
+        SFX.timerTick(secsLeft);
+      }
+    }
 
     if (left <= 0) {
       clearInterval(G.timerInterval);
